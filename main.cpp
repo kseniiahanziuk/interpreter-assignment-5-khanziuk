@@ -20,26 +20,22 @@ public:
             if (isdigit(ch) || ch == '.') {
                 token += ch;
                 i++;
-
                 while (i < expression.size() && (isdigit(expression[i]) || expression[i] == '.')) {
                     token += expression[i];
                     i++;
                 }
-
                 tokens.push(token);
                 token.clear();
             } else if (isalpha(ch)) {
                 token += ch;
                 i++;
-
                 while (i < expression.size() && isalpha(expression[i])) {
                     token += expression[i];
                     i++;
                 }
-
                 tokens.push(token);
                 token.clear();
-            } else if (string("+-*/").find(ch) != string::npos || ch == '(' || ch == ')' || ch == '.') {
+            } else if (string("+-*/,").find(ch) != string::npos || ch == '(' || ch == ')' || ch == ',') {
                 tokens.push(string(1, ch));
                 i++;
             } else if (isspace(ch)) {
@@ -129,6 +125,49 @@ private:
     }
 };
 
+class Calculator {
+public:
+    static double evaluateRPN(queue<string>& rpn) {
+        stack<double> elements;
+
+        while (!rpn.empty()) {
+            string token = rpn.front();
+            rpn.pop();
+
+            if (isdigit(token[0]) || (token[0] == '-' && token.size() > 1 && isdigit(token[1]))) {
+                elements.push(stod(token));
+            } else {
+                double operand2 = elements.top();
+                elements.pop();
+                double operand1 = elements.top();
+                elements.pop();
+                double result = operatorCalc(token, operand1, operand2);
+                elements.push(result);
+            }
+        }
+        return elements.top();
+    }
+
+private:
+    static double operatorCalc(const string& op, double a, double b) {
+        if (op == "+") return a + b;
+        if (op == "-") return a - b;
+        if (op == "*") return a * b;
+        if (op == "/") {
+            if (b == 0) {
+                throw invalid_argument("Division by zero is not possible.");
+            }
+            return a / b;
+        } else if (op == "pow") {
+            return pow(a, b);
+        } else if (op == "max") {
+            return max(a, b);
+        } else if (op == "min") {
+            return min(a, b);
+        }
+    }
+};
+
 int main() {
     string input;
     while (true) {
@@ -139,11 +178,8 @@ int main() {
                 queue<string> tokens = Tokenization::Tokenize(input);
                 queue<string> rpn = ShuntingYard::RPN(tokens);
 
-                while (!rpn.empty()) {
-                    cout << rpn.front() << " ";
-                    rpn.pop();
-                }
-                cout << endl;
+                double result = Calculator::evaluateRPN(rpn);
+                cout << "Result: " << result << endl;
             } else {
                 break;
             }
