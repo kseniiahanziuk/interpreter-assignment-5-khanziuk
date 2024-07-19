@@ -195,22 +195,37 @@ private:
 int main() {
     string input;
     while (true) {
-        try {
-            cout << "Enter expression(or 'exit' to quit): ";
-            getline(cin, input);
-            if (input != "exit") {
-                queue<string> tokens = Tokenization::Tokenize(input);
-                queue<string> rpn = ShuntingYard::RPN(tokens);
+        cout << "Enter expression (or 'exit' to quit): ";
+        getline(cin, input);
 
-                double result = Calculator::evaluateRPN(rpn);
-                cout << "Result: " << result << endl;
-            } else {
-                break;
+        if (input == "exit") {
+            break;
+        } try {
+            queue<string> tokens = Tokenization::Tokenize(input);
+
+            cout << "Tokens: ";
+            queue<string> tokensCopy = tokens;
+            while (!tokensCopy.empty()) {
+                cout << tokensCopy.front() << " ";
+                tokensCopy.pop();
             }
+            cout << endl;
+
+            queue<string> rpn = ShuntingYard::RPN(tokens);
+
+            cout << "RPN: ";
+            queue<string> rpnCopy = rpn;
+            while (!rpnCopy.empty()) {
+                cout << rpnCopy.front() << " ";
+                rpnCopy.pop();
+            }
+            cout << endl;
+
+            double result = Calculator::evaluateRPN(rpn);
+            cout << "Result: " << result << endl;
         } catch (const exception& e) {
             cerr << "Error: " << e.what() << endl;
         }
-
-        return 0;
     }
-};
+        return 0;
+}
