@@ -17,7 +17,25 @@ public:
         while (i < expression.size()) {
             char ch = expression[i];
 
-            if (isdigit(ch) || ch == '.') {
+            if (ch == '-') {
+                if (i == 0 || !isdigit(expression[i - 1]) && expression[i - 1] != '.') {
+                    token += ch;
+                    i++;
+                    while (i < expression.size() && (isdigit(expression[i]) || expression[i] == '.')) {
+                        token += expression[i];
+                        i++;
+                    }
+                    tokens.push(token);
+                    token.clear();
+                } else {
+                    if (!token.empty()) {
+                        tokens.push(token);
+                        token.clear();
+                    }
+                    tokens.push(string(1, ch));
+                    i++;
+                }
+            } else if (isdigit(ch) || ch == '.') {
                 token += ch;
                 i++;
                 while (i < expression.size() && (isdigit(expression[i]) || expression[i] == '.')) {
@@ -137,12 +155,18 @@ public:
             if (isdigit(token[0]) || (token[0] == '-' && token.size() > 1 && isdigit(token[1]))) {
                 elements.push(stod(token));
             } else {
-                double operand2 = elements.top();
-                elements.pop();
-                double operand1 = elements.top();
-                elements.pop();
-                double result = operatorCalc(token, operand1, operand2);
-                elements.push(result);
+                if (token == "abs") {
+                    double operand = elements.top();
+                    elements.pop();
+                    elements.push(abs(operand));
+                } else {
+                    double operand2 = elements.top();
+                    elements.pop();
+                    double operand1 = elements.top();
+                    elements.pop();
+                    double result = operatorCalc(token, operand1, operand2);
+                    elements.push(result);
+                }
             }
         }
         return elements.top();
@@ -164,7 +188,7 @@ private:
             return max(a, b);
         } else if (op == "min") {
             return min(a, b);
-        }
+        } throw invalid_argument("Invalid operator or function");
     }
 };
 
